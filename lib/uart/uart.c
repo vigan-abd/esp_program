@@ -55,18 +55,15 @@ void usart_int_init()
     sei(); // Enable the Global Interrupt Enable flag so that interrupts can be processed
 }
 /***************************************************************************//** 
- * @brief Transmits the data
+ * @brief Sends the data
  *
  * Sends the data via serial port communication.
  *
  * @param[in] uint8_t  data to be send
  *
- * @retval ADC_NO_ERROR         if the uart channel has been read successfully
- * @retval ADC_INVALID_CHANNEL  if a wrong uart channel was selected
- * @retval ADC_SHORT_2GND       if a short to ground has been detected
- * @retval ADC_SHORT_2BATTERY   if a short to batery has been detected
+ * @retval void
  ******************************************************************************/
-void usart_transmit(uint8_t data)
+void usart_send(uint8_t data)
 {
     /* Wait for empty transmit buffer */
     while (!(UCSRA & (1 << UDRE)))

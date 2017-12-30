@@ -34,13 +34,12 @@
  * Declarations of ADC's members
  */
 uint8_t uart_data;
-void    usart_Init     (uint16_t ubrr);
-void    usart_INT_init ();
-void    usart_Transmit (uint8_t  data);
-uint8_t usart_Receive  ();
+void    usart_init     (uint16_t ubrr);
+void    usart_int_init ();
+void    usart_send     (uint8_t  data);
+uint8_t usart_receive  ();
 
-/*
- * Declaration of Interrupt Service Routine
+ /* Declaration of Interrupt Service Routine
  */
 ISR (USART0_RX_vect)
 {
