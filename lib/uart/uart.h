@@ -26,23 +26,23 @@
 /*
  * Declarations of UART prescaler div factors
  */
-#define FOSC 1843200
-#define BAUD 9600
+#define FOSC          1843200
+#define BAUD          9600
 #define BAUD_PRESCALE FOSC / 16 / BAUD - 1
 
 /*
  * Declarations of ADC's members
  */
 uint8_t uart_data;
-void    USART_Init     (uint16_t ubrr);
-void    USART_INT_init ();
-void    USART_Transmit (uint8_t  data);
-uint8_t USART_Receive  ();
+void    usart_Init     (uint16_t ubrr);
+void    usart_INT_init ();
+void    usart_Transmit (uint8_t  data);
+uint8_t usart_Receive  ();
 
 /*
  * Declaration of Interrupt Service Routine
  */
-ISR(USART0_RX_vect)
+ISR (USART0_RX_vect)
 {
     uart_data = UDR0;
 }

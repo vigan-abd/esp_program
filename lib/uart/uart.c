@@ -21,15 +21,15 @@
 #include "uart.h"
 
 /***************************************************************************//** 
- * @brief Initialize the USART
+ * @brief Initialize the usart
  *
- * Initializes the USART by providing the prescaler div factor. Async Mode is used.
+ * Initializes the usart by providing the prescaler div factor. Async Mode is used.
  *
  * @param[in] uint16_t  specifies the baud rate
  *
  * @retval void 
  ******************************************************************************/
-void USART_Init(uint16_t ubrr)
+void usart_init(uint16_t ubrr)
 {
     /* Set baud rate */
     UBRRH = (uint8_t) (ubrr >> 8);
@@ -42,15 +42,15 @@ void USART_Init(uint16_t ubrr)
     UCSRC = (1 << USBS) | (3 << UCSZ0);
 }
 /***************************************************************************//** 
- * @brief Initialize the USART ISR
+ * @brief Initialize the usart ISR
  *
- * Initializes the USART Interrupt Service Routine. Readen data is stored in uart_data.
+ * Initializes the usart Interrupt Service Routine. Readen data is stored in uart_data.
  *
  * @retval void 
  ******************************************************************************/
-void USART_INT_init()
+void usart_int_init()
 {
-    /* Enable the USART Recieve Complete interrupt (USART_RXC) */
+    /* Enable the usart Recieve Complete interrupt (usart_RXC) */
     UCSRB |= (1 << RCXIE);
     sei(); // Enable the Global Interrupt Enable flag so that interrupts can be processed
 }
@@ -66,7 +66,7 @@ void USART_INT_init()
  * @retval ADC_SHORT_2GND       if a short to ground has been detected
  * @retval ADC_SHORT_2BATTERY   if a short to batery has been detected
  ******************************************************************************/
-void USART_Transmit(uint8_t data)
+void usart_transmit(uint8_t data)
 {
     /* Wait for empty transmit buffer */
     while (!(UCSRA & (1 << UDRE)))
@@ -82,7 +82,7 @@ void USART_Transmit(uint8_t data)
  *
  * @retval uint8_t 
  ******************************************************************************/
-uint8_t USART_Receive()
+uint8_t usart_receive()
 {
     /* Wait for data to be received */
     while (!(UCSRA & (1 << RXC)))
