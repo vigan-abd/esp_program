@@ -31,6 +31,23 @@
 #define BAUD_PRESCALE FOSC / 16 / BAUD - 1
 
 /*
+ * Declarations of UART prescaler div factors
+ */
+#define UART_ENABLE_INT () \
+  do \
+    { \
+      UCSRB |= (1 << RXCIE) | (1 << TXCIE);\
+    } \
+  while (0);
+
+#define UART_DISABLE_INT () \
+  do \
+    { \
+      UCSRB &= ~(1 << RXCIE) | (1 << TXCIE); \
+    } \
+  while (0);
+
+/*
  * Declarations of ADC's members
  */
 uint8_t uart_data;
