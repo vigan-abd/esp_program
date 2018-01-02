@@ -59,9 +59,6 @@ void rbuf_init ()
  ******************************************************************************/
 void rbuf_push (uint8_t data)
 {
-  /* enter the critical section --> disable the interrupts  */
-  UART_DISABLE_INT ();
-  
   r_buf.buf [r_buf.push_idx] = data;
   r_buf.push_idx             = (r_buf.push_idx +1) % RBUF_SIZE;
 
@@ -71,9 +68,6 @@ void rbuf_push (uint8_t data)
       r_buf.n_elm   = RBUF_SIZE;
       r_buf.pop_idx = (r_buf.pop_idx +1) % RBUF_SIZE;      
     }
-  
-  /* leave the critical section --> release the interrupts  */
-  UART_ENABLE_INT ();
 }
 
 
@@ -93,9 +87,6 @@ uint8_t rbuf_pop (uint8_t *const data)
 {
   uint8_t res = (uint8_t) RBUF_NO_ERROR;
   
-  /* enter the critical section --> disable the interrupts  */
-  UART_DISABLE_INT ();
-  
   if (!r_buf.n_elm)
     {
       res = (uint8_t) RBUF_EMPTY;
@@ -110,8 +101,6 @@ uint8_t rbuf_pop (uint8_t *const data)
           r_buf.n_elm = 0;
         }      
     }  
-  /* leave the critical section --> release the interrupts  */
-  UART_ENABLE_INT ();
 
   return res;
 }
