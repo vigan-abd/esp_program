@@ -17,12 +17,13 @@
 //    2017-01-02 (vigan.abd): Initial version
 //    $Log: test_r_buffer.h $
 //--
-uint8_t test_r_buffer_empty (r_buffer_t *const buff)
+uint8_t test_r_buffer_empty ()
 {
     uint8_t data = 0xFF;
     r_buffer_t buff;
     
     rbuf_init(&buff);
+    dump_r_buffer(&buff);
 
     if(buff.n_elm == 0)
     {
@@ -34,13 +35,14 @@ uint8_t test_r_buffer_empty (r_buffer_t *const buff)
     }
 }
 
-uint8_t test_r_buffer_push (r_buffer_t *const buff)
+uint8_t test_r_buffer_push ()
 {
     uint8_t data = 0xFF;
     r_buffer_t buff;
     
     rbuf_init(&buff);
     rbuf_push(&buff, 33);
+    dump_r_buffer(&buff);
 
     if(buff.buf[0] == 33 && buff.n_elm == 1 && buff.push_idx == 1 && buff.errno == RBUF_NO_ERROR)
     {
@@ -52,7 +54,7 @@ uint8_t test_r_buffer_push (r_buffer_t *const buff)
     }
 }
 
-uint8_t test_r_buffer_pop (r_buffer_t *const buff)
+uint8_t test_r_buffer_pop ()
 {
     int res, data;
     uint8_t data = 0xFF;
@@ -64,6 +66,7 @@ uint8_t test_r_buffer_pop (r_buffer_t *const buff)
     rbuf_push(&buff, 23);
 
     res = rbuf_pop(&buff, &data);
+    dump_r_buffer(&buff);
     if(res == RBUF_NO_ERROR && data == 23 && buff.pop_idx == 1)
     {
         return 1;
@@ -83,7 +86,7 @@ uint8_t test_r_buffer_pop (r_buffer_t *const buff)
  * @retval 1    if RBUF_EMPTY is returned as result of pop execution
  * @retval 0    if RBUF_EMPTY is not returned as result of pop execution
  ******************************************************************************/
-uint8_t test_r_buffer_empty_pop (r_buffer_t *const buff)
+uint8_t test_r_buffer_empty_pop ()
 {
     int i;
     uint8_t data = 0xFF;
@@ -114,7 +117,7 @@ uint8_t test_r_buffer_empty_pop (r_buffer_t *const buff)
  * @retval 1    if RBUF_OVERFLOW is returned as result of push execution
  * @retval 0    if RBUF_ERBUF_OVERFLOWMPTY is not returned as result of push execution
  ******************************************************************************/
-uint8_t test_r_buffer_overflow (r_buffer_t *const buff)
+uint8_t test_r_buffer_overflow ()
 {
     uint8_t res = RBUF_NO_ERROR, uint8_t data = 0xFF;
     int i = 0;
@@ -153,7 +156,7 @@ uint8_t test_r_buffer_overflow (r_buffer_t *const buff)
  * @retval 1    if first two elements of buf array are 30 and 31
  * @retval 0    otherwise
  ******************************************************************************/
-uint8_t test_r_buffer_rotate   (r_buffer_t *const buff)
+uint8_t test_r_buffer_rotate ()
 {
     int i = 0;
     r_buffer_t buff;
