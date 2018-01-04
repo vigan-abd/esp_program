@@ -2,26 +2,24 @@
 # Makefile                                                         #
 ####################################################################
 
+OUTDIR = documentation
+
 .SUFFIXES:				# ignore builtin rules
-.PHONY: clean all
+.PHONY: clean doc
 
 ####################################################################
 # Definitions                                                      #
 ####################################################################
 
 all:
-	@echo "Building the libs"
-	mkdir -p libdir
-	cd lib; make all
-	# cd src; make all
-	cd doc; make doc
-
+	@echo "Generate online documentation"
+	mkdir -p $(OUTDIR)
+	doxygen esp_program.dox
 clean:
 	@echo "Cleaning the libs"
-	cd lib; make clean
-	# cd src; make clean
-	cd doc; make clean
+	rm -rf $(OUTDIR)
 
 doc:
 	@echo "Generate online documentation"
-	cd doc; make doc
+	mkdir -p $(OUTDIR)
+	doxygen esp_program.dox	
