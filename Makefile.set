@@ -1,4 +1,4 @@
-#   Project:     Makefile.set
+##   Project:     Makefile.set
 #   
 #   File:        $RCSfile: Makefile.set,v $ 
 #   Description: common Makefile (GNU make)
@@ -51,7 +51,11 @@ MUXR       = JTAGZeusProg
 AS         = avr-as
 LD         = avr-ld 
 CC         = avr-gcc
+ifeq (DiziMB, $(findstring DiziMB, $(shell hostname)))
 AR	   = avr-gcc-ar
+else
+AR	   = avr-ar
+endif
 OBJCOPY    = avr-objcopy
 CHMOD	   = chmod
 # if the -MM option is unknown (non GNU compilers) use -M instead
