@@ -21,6 +21,8 @@
 #ifndef __TEST_R_BUFFER__H
 #define __TEST_R_BUFFER__H 1
 
+#include "r_buffer.h"
+
 /*
  * Define test cases
  */
@@ -30,7 +32,6 @@ uint8_t test_r_buffer_pop ();
 uint8_t test_r_buffer_empty_pop	();
 uint8_t test_r_buffer_overflow ();
 uint8_t test_r_buffer_rotate ();
-
 
 /*
  * Define logging functionalities

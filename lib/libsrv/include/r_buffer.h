@@ -21,7 +21,6 @@
 #ifndef __R_BUFFER__H
 #define __R_BUFFER__H 1
 
-#include <avr/io.h> 
 #include "esp_types.h"
 
 /*

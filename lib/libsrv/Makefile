@@ -74,8 +74,6 @@ vpath %.s $(S_PATHS)
 all:      debug
 ## all:      test-pc
 
-test-pc: $(OBJ_DIR) $(LST_DIR) $(EXE_DIR) test-pc-do
-
 debug:    CFLAGS += -DDEBUG -O0 -g3 
 debug:    $(OBJ_DIR) $(LST_DIR) $(EXE_DIR) $(EXE_DIR)/$(LIBNAME).a
 
@@ -121,13 +119,9 @@ splint:
 		$(SPLINT) $(SPLINTFLAGS) $(INCLUDEPATHS) $$file; \
 	done
 
-test-pc-do:
+test:
 	@echo "Making <<test-pc>> in the test directory: $(TESTDIR)"
-	$(MAKE) -C $(TESTDIR) clean all
-
-utest:
-	@echo "Making <<unit testc>> in the test directory: $(TESTDIR)"
-	$(MAKE) -C $(TESTDIR) clean utest
+	cd test; make all
 
 dox: 
 	@echo "Doxygen output will be stored in $(OUTPUT_DIR)"
