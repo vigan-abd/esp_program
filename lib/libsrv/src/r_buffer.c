@@ -1,5 +1,5 @@
-// Copyright (C) 2003-2015 swengLab Technologies - All rights reserved
-// Siebenbürgerstrasse 16-26/26/17, A--1220 Vienna, Austria. 
+// Copyright (C) 2017-2018 University of Prishtina - All rights reserved
+// Kodra e Diellit, 10000 Prishtina, Kosovo. 
 // Author: Dr. SMAILI Idriz   smaili.idriz@gmail.com
 //
 //++
@@ -14,7 +14,7 @@
 //    $Author: smaili $
 //
 // Revision Dates
-//    2017-01-02 (smaili): Initial version
+//    2018-01-27 (vigan.abd): Refactoring
 //    $Log: r_buffer.h $
 //--
 
@@ -29,17 +29,17 @@
  ******************************************************************************/
 void rbuf_init (volatile r_buffer_t *const r_buf)
 {
-  int idx= 0;
+    int idx = 0;
   
-  /* initialize the ring buffer */
-  r_buf->n_elm     = 0;
-  r_buf->pop_idx   = 0;
-  r_buf->push_idx  = 0;
-  r_buf->errno     = RBUF_NO_ERROR;
+    /* initialize the ring buffer */
+    r_buf->n_elm = 0;
+    r_buf->pop_idx = 0;
+    r_buf->push_idx = 0;
+    r_buf->errno = RBUF_NO_ERROR;
 
-  for (idx= 0; idx < RBUF_SIZE; idx++)
+    for (idx= 0; idx < RBUF_SIZE; idx++)
     {
-      r_buf->buf [idx] = 0x0;
+        r_buf->buf[idx] = 0x0;
     }
 }
 
@@ -54,14 +54,14 @@ void rbuf_init (volatile r_buffer_t *const r_buf)
  ******************************************************************************/
 void rbuf_push (volatile r_buffer_t *const r_buf, uint8_t data)
 {
-  r_buf->buf [r_buf->push_idx] = data;
-  r_buf->push_idx              = (r_buf->push_idx +1) % RBUF_SIZE;
+    r_buf->buf[r_buf->push_idx] = data;
+    r_buf->push_idx = (r_buf->push_idx + 1) % RBUF_SIZE;
 
-  if (++r_buf->n_elm > RBUF_SIZE)
+    if (++r_buf->n_elm > RBUF_SIZE)
     {
-      r_buf->errno   = RBUF_OVERFLOW;
-      r_buf->n_elm   = RBUF_SIZE;
-      r_buf->pop_idx = (r_buf->pop_idx +1) % RBUF_SIZE;      
+        r_buf->errno = RBUF_OVERFLOW;
+        r_buf->n_elm = RBUF_SIZE;
+        r_buf->pop_idx = (r_buf->pop_idx +1) % RBUF_SIZE;      
     }
 }
 
@@ -80,26 +80,26 @@ void rbuf_push (volatile r_buffer_t *const r_buf, uint8_t data)
  ******************************************************************************/
 uint8_t rbuf_pop (volatile r_buffer_t *const r_buf, uint8_t *const data)
 {
-  uint8_t res = (uint8_t) RBUF_NO_ERROR;
+    uint8_t res = (uint8_t) RBUF_NO_ERROR;
   
-  if (!r_buf->n_elm)
+    if (!r_buf->n_elm)
     {
-      return (uint8_t) RBUF_EMPTY;
+        return (uint8_t) RBUF_EMPTY;
     }
   
-  *data            = r_buf->buf [r_buf->pop_idx];
-  r_buf->pop_idx   = (r_buf->pop_idx +1) % RBUF_SIZE;
+    *data = r_buf->buf[r_buf->pop_idx];
+    r_buf->pop_idx = (r_buf->pop_idx + 1) % RBUF_SIZE;
 
-  if (--r_buf->n_elm <= 0)
+    if (--r_buf->n_elm <= 0)
     {
-      r_buf->n_elm = 0;
+        r_buf->n_elm = 0;
     }      
 
-  if (r_buf->errno == RBUF_OVERFLOW)
+    if (r_buf->errno == RBUF_OVERFLOW)
     {
-      res          = RBUF_OVERFLOW;
-      r_buf->errno = RBUF_NO_ERROR;
+        res = RBUF_OVERFLOW;
+        r_buf->errno = RBUF_NO_ERROR;
     }
 
-  return res;
+    return res;
 }

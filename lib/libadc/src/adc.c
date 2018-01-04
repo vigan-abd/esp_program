@@ -1,5 +1,5 @@
-// Copyright (C) 2003-2015 swengLab Technologies - All rights reserved
-// Siebenbürgerstrasse 16-26/26/17, A--1220 Vienna, Austria. 
+// Copyright (C) 2017-2018 University of Prishtina - All rights reserved
+// Kodra e Diellit, 10000 Prishtina, Kosovo. 
 // Author: Dr. SMAILI Idriz   smaili.idriz@gmail.com
 //
 //++
@@ -14,7 +14,7 @@
 //    $Author: smaili $
 //
 // Revision Dates
-//    2017-12-28 (smaili): Initial version
+//    2018-01-27 (vigan.abd): Refactoring
 //    $Log: adc.c $
 //--
 
@@ -31,17 +31,17 @@
  ******************************************************************************/
 void adc_init (uint8_t presc_fact)
 {
-  // specify the Aref=AVcc;
-  ADMUX   = (1 << REFS0);
+    // specify the Aref=AVcc;
+    ADMUX = (1 << REFS0);
 
-  // clear prescaler bits
-  ADCSRA &= ~((1 << ADPS0) | (1 << ADPS1) | ( 1 << ADPS2)); 
+    // clear prescaler bits
+    ADCSRA &= ~((1 << ADPS0) | (1 << ADPS1) | (1 << ADPS2)); 
 
-  /* set the predefined prescaler */
-  ADCSRA |= presc_fact;
+    /* set the predefined prescaler */
+    ADCSRA |= presc_fact;
 
-  /* enables conversion */
-  ADCSRA |= (1 << ADEN);
+    /* enables conversion */
+    ADCSRA |= (1 << ADEN);
 }
 
 /***************************************************************************//** 
@@ -58,38 +58,38 @@ void adc_init (uint8_t presc_fact)
  ******************************************************************************/
 uint8_t adc_get_raw (uint16_t *const raw_value, uint8_t channel)
 {
-  uint16_t val = 0;
+    uint16_t val = 0;
 
-  if (channel > 7) 
+    if (channel > 7) 
     {
-      return (uint8_t) ADC_INVALID_CHANNEL;
+        return (uint8_t) ADC_INVALID_CHANNEL;
     }
   
-  /* select the ADC Channel ch must be 0-7 */
-  ADMUX   |= channel;
+    /* select the ADC Channel ch must be 0-7 */
+    ADMUX |= channel;
 
-  /* start single conversion */
-  ADCSRA  |= (1 << ADSC);
+    /* start single conversion */
+    ADCSRA |= (1 << ADSC);
 
-  /* wait for conversion to complete */
-  while (! (ADCSRA & (1 << ADIF)));
+    /* wait for conversion to complete */
+    while (! (ADCSRA & (1 << ADIF)))
+        ;
 
-  val = (ADCH << 8) | ADCL;
+    val = (ADCH << 8) | ADCL;
 
-  /* clear ADIF by writing one to it -> make it ready for the next adc conversion */
-  ADCSRA |= (1<<ADIF);
+    /* clear ADIF by writing one to it -> make it ready for the next adc conversion */
+    ADCSRA |= (1<<ADIF);
 
-  if (val == 0x000)
+    if (val == 0x000)
     {
-      return (uint8_t) ADC_SHORT_2GND;
+        return (uint8_t) ADC_SHORT_2GND;
     }
-  else if (val == 0x3FF)
+    else if (val == 0x3FF)
     {
-      return (uint8_t) ADC_SHORT_2BATTERY;
+        return (uint8_t) ADC_SHORT_2BATTERY;
     }
 
-  *raw_value = val;
+    *raw_value = val;
 
-  return (uint8_t) ADC_NO_ERROR;
+    return (uint8_t) ADC_NO_ERROR;
 }
-

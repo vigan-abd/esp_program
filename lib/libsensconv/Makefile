@@ -8,7 +8,7 @@
 ####################################################################
 # Definitions                                                      #
 ####################################################################
-LIBNAME  = libsrv
+LIBNAME  = libsensconv
 LIBDIR   = ../libdir
 
 OUT_NAME = output
@@ -39,7 +39,7 @@ RM  	= $(QUOTE)rm -rf$(QUOTE)
 DEPFLAGS = -MMD -MP -MF $(@:.o=.d)
 
 INCLUDEPATHS += \
--I./include 
+-I./include -I../libsrv/include 
 
 SPLINTFLAGS +=  +standard -mustfreeonly -likelybool -temptrans -mayaliasunique \
                 -nullstate -mustdefine -compdef -mustfreefresh
@@ -49,8 +49,7 @@ SPLINTFLAGS +=  +standard -mustfreeonly -likelybool -temptrans -mayaliasunique \
 ####################################################################
 
 C_SRC +=  \
-./src/esp_math.c  \
-./src/r_buffer.c  
+./src/temp_conv.c  
 
 S_SRC +=  
 

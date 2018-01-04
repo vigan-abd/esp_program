@@ -1,5 +1,5 @@
-// Copyright (C) 2003-2015 swengLab Technologies - All rights reserved
-// Siebenbürgerstrasse 16-26/26/17, A--1220 Vienna, Austria. 
+// Copyright (C) 2017-2018 University of Prishtina - All rights reserved
+// Kodra e Diellit, 10000 Prishtina, Kosovo. 
 // Author: Abdurrahmani Vigan   vigan.abd@gmail.com
 //
 //++
@@ -14,7 +14,7 @@
 //    $Author: vigan.abd $
 //
 // Revision Dates
-//    2017-01-02 (vigan.abd): Initial version
+//    2018-01-27 (vigan.abd): Refactoring
 //    $Log: test_r_buffer.h $
 //--
 

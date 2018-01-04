@@ -1,5 +1,5 @@
-// Copyright (C) 2003-2015 swengLab Technologies - All rights reserved
-// Siebenbürgerstrasse 16-26/26/17, A--1220 Vienna, Austria. 
+// Copyright (C) 2017-2018 University of Prishtina - All rights reserved
+// Kodra e Diellit, 10000 Prishtina, Kosovo. 
 // Author: Dr. SMAILI Idriz   smaili.idriz@gmail.com
 //
 //++
@@ -14,7 +14,7 @@
 //    $Author: smaili $
 //
 // Revision Dates
-//    2017-12-28 (smaili): Initial version
+//    2018-01-27 (vigan.abd): Refactoring
 //    $Log: uart.h $
 //--
 
@@ -35,17 +35,17 @@
  */
 #if defined (UART_USE_CH1)
 #define UART_NO_CHANNELS 2
-#define UART_CHANNEL_0   0
-#define UART_CHANNEL_1   1
+#define UART_CHANNEL_0 0
+#define UART_CHANNEL_1 1
 #else
-#define UART_CHANNEL_0   0
+#define UART_CHANNEL_0 0
 #define UART_NO_CHANNELS 1
 #endif
 
 /*
  * Declarations of UART prescaler div factors
  */
-#define FOSC           1843200
+#define FOSC 14745600 //1843200
 
 #if !defined (BAUD0)
 #error "The uart baudrate for the UART channel 0 has to be specified"
@@ -63,7 +63,7 @@
 /*
  * Declarations of UART macros
  */
-#define UART_INIT_CHANNEL(ubrr, ch)\
+#define UART_INIT_CHANNEL (ubrr, ch)\
   /* Set baud rate */ \
   UBRR##ch##H = (uint8_t) (ubrr >> 8);\
   UBRR##ch##L = (uint8_t) ubrr;\
@@ -77,17 +77,17 @@
   /* Enable the uart Recieve Complete interrupt (uart_RXC) */\
   UCSR##ch##B |= (1 << RXCIE##ch);\
 
-#define UART_ENABLE_INT(ch)                \
-  do \
+#define UART_ENABLE_INT (ch)                \
+    do \
     { \
-      UCSR##ch##B |= (1 << RXCIE##ch) | (1 << TXCIE##ch);     \
+        UCSR##ch##B |= (1 << RXCIE##ch) | (1 << TXCIE##ch);     \
     } \
-  while (0);\
+    while (0);\
 
-#define UART_DISABLE_INT(ch)\
-  UCSR##ch##B &= ~(1 << RXCIE##ch) | (1 << TXCIE##ch) \
+#define UART_DISABLE_INT (ch)\
+    UCSR##ch##B &= ~(1 << RXCIE##ch) | (1 << TXCIE##ch) \
 
-#define UART_SEND(ch, data)\
+#define UART_SEND (ch, data)\
     /* Wait for empty transmit buffer */\
     while (!(UCSR##ch##A & (1 << UDRE##ch)))\
         ;\
@@ -97,19 +97,17 @@
 /*
  * Declarations of ADC's members
  */
-void              uart_init     (uint16_t ubrr0, uint16_t ubrr);
-volatile
-r_buffer_t *const uart_get_rbuf (uint8_t  chan);
-uint8_t           uart_send     (uint8_t  chan, uint8_t  data);
-uint8_t           uart_receive  (uint8_t  chan, uint8_t *buf, uint8_t b_len,
-                                  uint8_t *const rx_len);
+void uart_init (uint16_t ubrr0, uint16_t ubrr1);
+volatile r_buffer_t *const uart_get_rbuf (uint8_t chan);
+uint8_t uart_send (uint8_t chan, uint8_t data);
+uint8_t uart_receive (uint8_t chan, uint8_t *buf, uint8_t b_len, uint8_t *const rx_len);
 
  /* Declaration of interrupt rx service routine for the UART#0
  */
-void ISR(USART0_RX_vect);
+void ISR (USART0_RX_vect);
 
 #if defined (UART_USE_CH1)
-void ISR(USART1_RX_vect);
+void ISR (USART1_RX_vect);
 #endif
 
 #endif /* __UART__H */
