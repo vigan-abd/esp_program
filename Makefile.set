@@ -30,8 +30,8 @@ FORMAT     = ihex
 
 # select warnlevel & flags
 WARNLEVEL  = -Wall -Wstrict-prototypes
-CFLAGS     = $(WARNLEVEL) -Os -mmcu=$(MCU) -ggdb
-ASFLAGS    = -mmcu=$(MCU) -Wa,-mmcu=$(MCU) -ggdb
+CFLAGS     = $(WARNLEVEL) -Os -mmcu=$(MCU) -ggdb 
+ASFLAGS    = -mmcu=$(MCU) -Wa,-mmcu=$(MCU) -ggdb 
 LDFLAGS    = -mmcu=$(MCU) -ggdb
 LIBRARIES  =
 EEPFLAGS   = -j .eeprom                             \
@@ -50,7 +50,8 @@ MUXR       = JTAGZeusProg
 
 AS         = avr-as
 LD         = avr-ld 
-CC         = avr-gcc 
+CC         = avr-gcc
+AR	   = avr-gcc-ar
 OBJCOPY    = avr-objcopy
 CHMOD	   = chmod
 # if the -MM option is unknown (non GNU compilers) use -M instead
