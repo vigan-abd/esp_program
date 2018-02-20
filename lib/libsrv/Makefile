@@ -49,6 +49,7 @@ SPLINTFLAGS +=  +standard -mustfreeonly -likelybool -temptrans -mayaliasunique \
 ####################################################################
 
 C_SRC +=  \
+./src/bcd.c  \
 ./src/esp_math.c  \
 ./src/r_buffer.c  
 

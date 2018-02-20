@@ -7,7 +7,7 @@
 //    @file uart.h
 //
 // Purpose
-//    @brief Implements the routine needed to handle the ADC  
+//    @brief Implements the routines needed to handle the UART communication
 //
 // Author
 //    @author: Dr. Dipl.-Ing. Idriz SMAILI, smaili.idriz@gmail.com
@@ -21,93 +21,56 @@
 #ifndef __UART__H
 #define __UART__H 1
 
+#include "esp_types.h"
 #include <avr/io.h> 
-
-#include "r_buffer.h"
-
-/*
- * Declarations of UART MACROS
- */
-#define UART_INVALID_CHANNEL 0x30
+#include <util/delay.h>
+#include "tmr.h"
 
 /*
- * Declarations of UART no of channels
+ * Define uart interrupt service routine constants
  */
-#if defined (UART_USE_CH1)
-#define UART_NO_CHANNELS 2
-#define UART_CHANNEL_0 0
-#define UART_CHANNEL_1 1
-#else
-#define UART_CHANNEL_0 0
-#define UART_NO_CHANNELS 1
-#endif
+#define UART_ISR_RX0 USART0_RX_vect
+#define UART_ISR_TX0 USART0_TX_vect
+#define UART_ISR_RX1 USART1_RX_vect
+#define UART_ISR_TX1 USART1_TX_vect
+
+/*
+ * Define uart constants
+ */
+#define UART_INVALID_CHANNEL 0
+#define UART_NO_ERROR 1
+#define UART_EMPTY_DATA 2
+#define UART_FULL_BUFFER 3
+#define UART_CH_0 0
+#define UART_CH_1 1
 
 /*
  * Declarations of UART prescaler div factors
  */
-#define FOSC 14745600 //1843200
-
-#if !defined (BAUD0)
-#error "The uart baudrate for the UART channel 0 has to be specified"
-#endif
-
-#define BAUD0_PRESCALE FOSC / 16 / BAUD0 - 1
-
-#if defined (UART_USE_CH1)
-#if !defined (BAUD1)
-#error "The uart baudrate for the UART channel 1 has to be specified"
-#endif
-#define BAUD1_PRESCALE FOSC / 16 / BAUD1 - 1
-#endif
+#define FREQ 16000000
+#define BAUD0 1200
+#define BAUD0_PRESCALE ((FREQ / (16 * BAUD0)) - 1)
+#define BAUD1 1200
+#define BAUD1_PRESCALE ((FREQ / (16 * BAUD1)) - 1)
 
 /*
- * Declarations of UART macros
+ * Define uart watchdog service routines
  */
-#define UART_INIT_CHANNEL (ubrr, ch)\
-  /* Set baud rate */ \
-  UBRR##ch##H = (uint8_t) (ubrr >> 8);\
-  UBRR##ch##L = (uint8_t) ubrr;\
-\
-  /* Enable receiver and transmitter */ \
-  UCSR##ch##B = (1 << RXEN##ch) | (1 << TXEN##ch); \
-\
-  /* Set frame format: 8data, 2stop bit */     \
-  UCSR##ch##C = (1 << USBS) | (3 << UCSZ##ch); \
-\
-  /* Enable the uart Recieve Complete interrupt (uart_RXC) */\
-  UCSR##ch##B |= (1 << RXCIE##ch);\
-
-#define UART_ENABLE_INT (ch)                \
-    do \
-    { \
-        UCSR##ch##B |= (1 << RXCIE##ch) | (1 << TXCIE##ch);     \
-    } \
-    while (0);\
-
-#define UART_DISABLE_INT (ch)\
-    UCSR##ch##B &= ~(1 << RXCIE##ch) | (1 << TXCIE##ch) \
-
-#define UART_SEND (ch, data)\
-    /* Wait for empty transmit buffer */\
-    while (!(UCSR##ch##A & (1 << UDRE##ch)))\
-        ;\
-    /* Put data into buffer, sends the data */  \
-    UDR##ch = data;\
+#define UART_ISR_WATCHDOG_CH_0 TMR_ISR_OCR0
+#define UART_ISR_WATCHDOG_CH_1 TMR_ISR_OCR2
 
 /*
- * Declarations of ADC's members
+ * Define uart members
  */
-void uart_init (uint16_t ubrr0, uint16_t ubrr1);
-volatile r_buffer_t *const uart_get_rbuf (uint8_t chan);
-uint8_t uart_send (uint8_t chan, uint8_t data);
-uint8_t uart_receive (uint8_t chan, uint8_t *buf, uint8_t b_len, uint8_t *const rx_len);
-
- /* Declaration of interrupt rx service routine for the UART#0
- */
-void ISR (USART0_RX_vect);
-
-#if defined (UART_USE_CH1)
-void ISR (USART1_RX_vect);
-#endif
+uint8_t uart_init (uint16_t baud, uint8_t ch);
+uint8_t uart_set_rcv_int (uint8_t ch);
+uint8_t uart_clr_rcv_int (uint8_t ch);
+uint8_t uart_set_trm_int (uint8_t ch);
+uint8_t uart_clr_trm_int (uint8_t ch);
+uint8_t uart_trm (uint8_t data, uint8_t ch, uint8_t *const stop_flag);
+uint8_t uart_rcv (uint8_t *const data, uint8_t ch, uint8_t *const stop_flag);
+uint8_t uart_flush (uint8_t ch);
+uint8_t uart_watchdog_start (uint8_t tmr_top, uint8_t ch);
+uint8_t uart_watchdog_stop (uint8_t ch);
 
 #endif /* __UART__H */

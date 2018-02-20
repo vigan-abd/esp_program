@@ -36,7 +36,10 @@ LIBDIR   = ../../lib/libdir
 
 # Included libraries
 INCLUDE_LIBS += \
--L$(LIBDIR) -lsrv
+-L$(LIBDIR) -luart -lsrv -lspi -lbulb -ltmr
+
+INCLUDE_PATHS += \
+-I../../lib/libsrv/include -I../../lib/lib7seg/include -I../../lib/libuart/include -I../../lib/libtmr/include -I../../lib/libbulb/include 
 
 # Evaluator file
 EVAL_FILE = ../../evaluator.elf
@@ -114,7 +117,7 @@ endif
 	$(OBJCOPY) $(EEPFLAGS) -O $(FORMAT) $< $@
 
 %.elf:	$(OBJS) $(SUBOBJS)
-	$(CC) -Wl,-Map=$*.m $(LDFLAGS) -o $@ $(OBJS) $(INCLUDE_LIBS) $(SUBOBJS) $(LIBOPT)
+	$(CC) -Wl,-Map=$*.m $(LDFLAGS) -o $@ $(OBJS) $(INCLUDE_LIBS) $(INCLUDE_PATHS) $(SUBOBJS) $(LIBOPT)
 # the x bit is set by the compiler but since this is a cross compiler
 # this programm should not be executeable on this machine
 	@$(CHMOD) ugo-x $@
@@ -125,7 +128,7 @@ endif
 # sed is used to convert this into:
 # "Node_2.o Node_2.d: Node_2.c Header1.h Header2.h ..."
 # to declare the dependencies of Node_2.d too
-	$(CC) $(DOPT) $(CFLAGS) $(INCLUDE_LIBS) $<|sed 's,\($*\).o[ :]*,\1.o $@: ,g' > $@
+	$(CC) $(DOPT) $(CFLAGS) $(INCLUDE_LIBS) $(INCLUDE_PATHS) $<|sed 's,\($*\).o[ :]*,\1.o $@: ,g' > $@
 
 %.d:	%.S
 # the compiler generates output of the following format:
@@ -136,16 +139,16 @@ endif
 	$(CC) $(DOPT) $(CFLAGS) $<|sed 's,\($*\).o[ :]*,\1.o $@: ,g' > $@
 
 %.o:	%.c
-	$(CC) $(CFLAGS) $(INCLUDE_LIBS) -Wall -c -o $@ $<
+	$(CC) $(CFLAGS) $(INCLUDE_LIBS) $(INCLUDE_PATHS) -Wall -c -o $@ $<
 
 %.o:	%.S
-	$(CC) $(CFLAGS) $(INCLUDE_LIBS) -Wall -c -o $@ $<
+	$(CC) $(CFLAGS) $(INCLUDE_LIBS) $(INCLUDE_PATHS) -Wall -c -o $@ $<
 
 %.i:	%.c
-	$(CC) $(CFLAGS) $(INCLUDE_LIBS) -E -o $@ $<
+	$(CC) $(CFLAGS) $(INCLUDE_LIBS) $(INCLUDE_PATHS) -E -o $@ $<
 
 %.s:	%.c
-	$(CC) $(CFLAGS) $(INCLUDE_LIBS) -S -o $@ $<
+	$(CC) $(CFLAGS) $(INCLUDE_LIBS) $(INCLUDE_PATHS) -S -o $@ $<
 
 # intended:
 # TMPCLEAN = cd $(dir); make clean\n
@@ -223,7 +226,7 @@ debug: install
 
 muster:
 #install the evaluator
-	$(MUXR) --port=0
+	$(MUXR) --port=1
 	$(MUXR) --global-disable=0
 	$(PROGR) --erase --program --file $(EVAL_FILE) --jtag $(INTERFACE) 
 	$(MUXR) --reset16

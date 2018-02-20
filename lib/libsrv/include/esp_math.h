@@ -6,14 +6,14 @@
 //
 //++
 // Name
-//    @file esp_types.h
+//    @file esp_math.h
 //
 // Purpose
-//    @brief Specifies the data types used in the project  
+//    @brief Specifies the math library used in solution  
 //
 // Revision Dates
 //    2018-01-27 (vigan.abd): Inital create
-//    $Log: esp_types.h $
+//    $Log: esp_math.h $
 //--
 
 #ifndef __ESP_MATH__H

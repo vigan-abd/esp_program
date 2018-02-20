@@ -6,6 +6,39 @@
 
 int main ()
 {
+    printf("Test Case >> test_bcd_conversion\n");
+    if (!test_bcd_conversion())
+    {
+        printf("Result >> error\n");
+        exit(1);
+    }
+    else
+    {
+        printf("Result >> success\n");
+    }
+
+    printf("Test Case >> test_bcd_max_conversion\n");
+    if (!test_bcd_max_conversion())
+    {
+        printf("Result >> error\n");
+        exit(1);
+    }
+    else
+    {
+        printf("Result >> success\n");
+    }
+
+    printf("Test Case >> test_bcd_min_conversion\n");
+    if (!test_bcd_min_conversion())
+    {
+        printf("Result >> error\n");
+        exit(1);
+    }
+    else
+    {
+        printf("Result >> success\n");
+    }
+
     printf("Test Case >> test_r_buffer_empty\n");
     if (!test_r_buffer_empty())
     {

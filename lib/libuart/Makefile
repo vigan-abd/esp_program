@@ -39,7 +39,7 @@ RM  	= $(QUOTE)rm -rf$(QUOTE)
 DEPFLAGS = -MMD -MP -MF $(@:.o=.d)
 
 INCLUDEPATHS += \
--I./include -I../libsrv/include 
+-I./include -I../libsrv/include -I../libtmr/include 
 
 SPLINTFLAGS +=  +standard -mustfreeonly -likelybool -temptrans -mayaliasunique \
                 -nullstate -mustdefine -compdef -mustfreefresh
@@ -76,7 +76,7 @@ all:      debug
 
 test-pc: $(OBJ_DIR) $(LST_DIR) $(EXE_DIR) test-pc-do
 
-debug:    CFLAGS += -DDEBUG -O0 -g3 -DBAUD0=9600 -DBAUD1=9600
+debug:    CFLAGS += -DDEBUG -Os -g3
 debug:    $(OBJ_DIR) $(LST_DIR) $(EXE_DIR) $(EXE_DIR)/$(LIBNAME).a
 
 release:  CFLAGS += -DNDEBUG -O3 

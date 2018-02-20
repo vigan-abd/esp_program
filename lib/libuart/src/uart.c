@@ -7,7 +7,7 @@
 //    @file uart.c
 //
 // Purpose
-//    @brief Implements the routine needed to handle the ADC  
+//    @brief Implements the routines needed to handle the UART communication
 //
 // Author
 //    @author: Dr. Dipl.-Ing. Idriz SMAILI, smaili.idriz@gmail.com
@@ -20,140 +20,319 @@
 
 #include "uart.h"
 
-static volatile r_buffer_t r_bufs[UART_NO_CHANNELS];
-
 /***************************************************************************//** 
- * @brief Initialize the uart
+ * @brief Initialize UART 
  *
- * Initializes the uart by providing the prescaler div factor. Async Mode is used.
+ * Initialize UART
  *
- * @param[in] uint16_t  specifies the baud rate
- *
- * @retval void 
- ******************************************************************************/
-void uart_init (uint16_t ubrr0, uint16_t ubrr1)
-{
-    UART_INIT_CHANNEL(ubrr0, 0);
-  
-#if defined (UART_USE_CH1)
-    UART_INIT_CHANNEL(ubrr1, 1);
-#endif
-  
-    /* Enable the Global Interrupt Enable flag so that interrupts
-     * can be processedinclude
-     */
-    sei(); 
-}
-/***************************************************************************//** 
- * @brief Returns the uart ring buffer
- *
- * Returns the uart ring buffer for the specified channel.
- *
- * @retval void 
- ******************************************************************************/
-volatile r_buffer_t *const uart_get_rbuf (uint8_t channel)
-{
-    if (channel < 0 || channel >= UART_NO_CHANNELS)
-    {
-        return (r_buffer_t *const) 0;
-    }
-    
-    return &r_bufs[channel];
-}
-/***************************************************************************//** 
- * @brief Sends the data
- *
- * Sends the data via serial port communication.
- *
- * @param[in] uint8_t  data to be send
- *
- * @retval RBUF_NO_ERROR
- * @retval UART_INVALID_CHANNEL
- ******************************************************************************/
-uint8_t uart_send (uint8_t channel, uint8_t data)
-{
-    if (channel < 0 || channel >= UART_NO_CHANNELS)
-    {
-        return (uint8_t) UART_INVALID_CHANNEL;
-    }
-
-    if (channel == UART_CHANNEL_0)
-    {
-        UART_SEND(0, data);
-    }
-#if defined (UART_USE_CH1)
-    else
-    {
-        UART_SEND(1, data);
-    }
-#endif
-
-    return (uint8_t) RBUF_NO_ERROR;
-}
-
-/***************************************************************************//** 
- * @brief Reads data from SP
- *
- * Reads the data from Serial Port. The communication works in blocking receive mode.
+ * @param[in] uint16_t  baud
+ * @param[in] uint8_t  ch
  *
  * @retval uint8_t 
  ******************************************************************************/
-uint8_t uart_receive (uint8_t chan, uint8_t *buf, uint8_t b_len, uint8_t *const rx_len)
+uint8_t uart_init (uint16_t baud, uint8_t ch)
 {
-    register uint8_t idx = 0;
-    register uint8_t res = RBUF_NO_ERROR;
-
-    *rx_len = 0;
-  
-    volatile r_buffer_t *const r_buf = uart_get_rbuf(chan);
-    if (r_buf == 0)
+    if (ch != UART_CH_0 && ch != UART_CH_1)
     {
-        return (uint8_t) UART_INVALID_CHANNEL;
+       return UART_INVALID_CHANNEL;
     }
 
-    if (!r_buf->n_elm)
+    if (ch == UART_CH_0)
     {
-        return (uint8_t) RBUF_EMPTY;
+        UBRR0H = (unsigned char) (baud >> 8);
+        UBRR0L = (unsigned char) (baud & 0xFF);
+        
+        UCSR0B = (1 << RXEN0) | (1 << TXEN0);
+        UCSR0C = (3 << UCSZ0) | (1 < USBS0);
+        // UCSR0C |= (3 << UPM0);
+    }
+    else
+    {
+        UBRR1H = (unsigned char) (baud >> 8);
+        UBRR1L = (unsigned char) (baud & 0xFF);
+        
+        UCSR1B = (1 << RXEN1) | (1 << TXEN1);
+        UCSR1C = (3 << UCSZ1) | (1 < USBS1);
+        // UCSR1C |= (3 << UPM1);
     }
 
-    for (idx = 0; idx < b_len; idx++)
-    {
-        res = rbuf_pop(r_buf, &buf[idx]);
+    return UART_NO_ERROR;
+}
 
-        if (res == RBUF_EMPTY)
-        {
-            res = RBUF_NO_ERROR;
-            *rx_len = idx;
-            break;
-        }
+/***************************************************************************//** 
+ * @brief Transmit data via UART 
+ *
+ * Transmit data via UART
+ *
+ * @param[in] uint8_t  data
+ * @param[in] uint8_t  ch
+ * @param[in] uint8_t*  stop_flag
+ *
+ * @retval uint8_t 
+ ******************************************************************************/
+uint8_t uart_trm (uint8_t data, uint8_t ch, uint8_t *const stop_flag)
+{
+    if (ch != UART_CH_0 && ch != UART_CH_1)
+    {
+       return UART_INVALID_CHANNEL;
     }
 
-    return res;
+    if (ch == UART_CH_0)
+    {
+        while ( (!(*stop_flag)) && (!(UCSR0A & (1 << UDRE0))) )
+            ;
+        if (*stop_flag)
+            return UART_FULL_BUFFER;
+        UDR0 = data;
+    }
+    else
+    {
+        while ( !(*stop_flag) && (!(UCSR1A & (1 << UDRE1))) )
+            ;
+        if (*stop_flag)
+            return UART_FULL_BUFFER;
+        UDR1 = data;
+    }
+
+    return UART_NO_ERROR;
 }
 
-void ISR(USART0_RX_vect)
+/***************************************************************************//** 
+ * @brief Receive data via UART
+ *
+ * Receive data via UART
+ *
+ * @param[in] uint8_t*  data
+ * @param[in] uint8_t  ch
+ * @param[in] uint8_t*  stop_flag
+ *
+ * @retval uint8_t 
+ ******************************************************************************/
+uint8_t uart_rcv (uint8_t *const data, uint8_t ch, uint8_t *const stop_flag)
 {
-    /* disable interrupts */
-    UART_DISABLE_INT(0);
+    if (ch != UART_CH_0 && ch != UART_CH_1)
+    {
+       return UART_INVALID_CHANNEL;
+    }
 
-    /* read the data (a byte) and push it into the ring-buffer */
-    rbuf_push(uart_get_rbuf(UART_CHANNEL_0), (uint8_t) UDR0);
+    if (ch == UART_CH_0)
+    {
+        while ( (!(*stop_flag)) && (!(UCSR0A & (1 << RXC0))) )
+            ;
+        if (*stop_flag)
+            return UART_EMPTY_DATA;
+        *data = UDR0;
+    }
+    else
+    {
+        while ( (!(*stop_flag)) && (!(UCSR1A & (1 << RXC1))) )
+            ;
+        if (*stop_flag)
+            return UART_EMPTY_DATA;
+        *data = UDR1;
+    }
 
-    /* enable interrupts */
-    UART_ENABLE_INT(0);
+    return UART_NO_ERROR;
 }
 
-#if defined (UART_USE_CH1)
-void ISR (USART1_RX_vect)
+/***************************************************************************//** 
+ * @brief Flush UART buffer
+ *
+ * Flush UART buffer
+ *
+ * @param[in] uint8_t  ch
+ *
+ * @retval uint8_t 
+ ******************************************************************************/
+uint8_t uart_flush (uint8_t ch)
 {
-    /* disable interrupts */
-    UART_DISABLE_INT("1");
+    uint8_t dummy;
+    _delay_ms(150);
+    
+    if (ch != UART_CH_0 && ch != UART_CH_1)
+    {
+       return UART_INVALID_CHANNEL;
+    }
 
-    /* read the data (a byte) and push it into the ring-buffer */
-    /* read the data (a byte) and push it into the ring-buffer */
-    rbuf_push(uart_get_rbuf(UART_CHANNEL_1), (uint8_t) UDR1);
+    if (ch == UART_CH_0)
+    {
+        while(UCSR0A & (1 << RXC0))
+            dummy = UDR0;
+    }
+    else
+    {
+        while(UCSR1A & (1 << RXC1))
+            dummy = UDR1;
+    }
 
-    /* enable interrupts */
-    UART_ENABLE_INT("1");
+    return UART_NO_ERROR;
 }
-#endif
+
+/***************************************************************************//** 
+ * @brief Start Watchdog for UART
+ *
+ * Start Watchdog for UART
+ *
+ * @param[in] uint8_t  tmr_top
+ * @param[in] uint8_t  ch
+ *
+ * @retval uint8_t 
+ ******************************************************************************/
+uint8_t uart_watchdog_start (uint8_t tmr_top, uint8_t ch)
+{
+    if (ch != UART_CH_0 && ch != UART_CH_1)
+    {
+       return UART_INVALID_CHANNEL;
+    }
+    
+    if (ch == UART_CH_0)
+    {
+        tmr0_init_ctc(tmr_top, TMR0_PRESCALER_FACT_128);
+    }
+    else
+    {
+        tmr2_init_ctc(tmr_top, TMR2_PRESCALER_FACT_128);
+    }
+
+    return UART_NO_ERROR;
+}
+
+/***************************************************************************//** 
+ * @brief Stop watchdog for UART
+ *
+ * Stop watchdog for UART
+ *
+ * @param[in] uint8_t  ch
+ *
+ * @retval uint8_t 
+ ******************************************************************************/
+uint8_t uart_watchdog_stop (uint8_t ch)
+{
+    if (ch != UART_CH_0 && ch != UART_CH_1)
+    {
+       return UART_INVALID_CHANNEL;
+    }
+
+    if (ch == UART_CH_0)
+    {
+        TIMSK &= ~(1 << OCIE0);
+    }
+    else
+    {
+        TIMSK &= ~(1 << OCIE2);
+    }
+
+    return UART_NO_ERROR;
+}
+
+/***************************************************************************//** 
+ * @brief Enable recive ISR for UART
+ *
+ * Enable recive ISR for UART
+ *
+ * @param[in] uint8_t  ch
+ *
+ * @retval uint8_t 
+ ******************************************************************************/
+uint8_t uart_set_rcv_int (uint8_t ch)
+{
+    if (ch != UART_CH_0 && ch != UART_CH_1)
+    {
+       return UART_INVALID_CHANNEL;
+    }
+
+    if (ch == UART_CH_0)
+    {
+        UCSR0B |= (1 << RXCIE0);
+    }
+    else
+    {
+        UCSR1B |= (1 << RXCIE1);
+    }
+
+    return UART_NO_ERROR;
+}
+
+/***************************************************************************//** 
+ * @brief Disable recive ISR for UART
+ *
+ * Disable recive ISR for UART
+ *
+ * @param[in] uint8_t  ch
+ *
+ * @retval uint8_t 
+ ******************************************************************************/
+uint8_t uart_clr_rcv_int (uint8_t ch)
+{
+    if (ch != UART_CH_0 && ch != UART_CH_1)
+    {
+       return UART_INVALID_CHANNEL;
+    }
+
+    if (ch == UART_CH_0)
+    {
+        UCSR0B &= ~(1 << RXCIE0);
+    }
+    else
+    {
+        UCSR1B &= ~(1 << RXCIE1);
+    }
+
+    return UART_NO_ERROR;
+}
+
+/***************************************************************************//** 
+ * @brief Enable transmit ISR for UART
+ *
+ * Enable transmit ISR for UART
+ *
+ * @param[in] uint8_t  ch
+ *
+ * @retval uint8_t 
+ ******************************************************************************/
+uint8_t uart_set_trm_int (uint8_t ch)
+{
+    if (ch != UART_CH_0 && ch != UART_CH_1)
+    {
+       return UART_INVALID_CHANNEL;
+    }
+
+    if (ch == UART_CH_0)
+    {
+        UCSR0B |= (1 << TXCIE0);
+    }
+    else
+    {
+        UCSR1B |= (1 << TXCIE1);
+    }
+
+    return UART_NO_ERROR;
+}
+
+/***************************************************************************//** 
+ * @brief Disable transmit ISR for UART
+ *
+ * Disable transmit ISR for UART
+ *
+ * @param[in] uint8_t  ch
+ *
+ * @retval uint8_t 
+ ******************************************************************************/
+uint8_t uart_clr_trm_int (uint8_t ch)
+{
+    if (ch != UART_CH_0 && ch != UART_CH_1)
+    {
+       return UART_INVALID_CHANNEL;
+    }
+
+    if (ch == UART_CH_0)
+    {
+        UCSR0B &= ~(1 << TXCIE0);
+    }
+    else
+    {
+        UCSR1B &= ~(1 << TXCIE1);
+    }
+
+    return UART_NO_ERROR;
+}

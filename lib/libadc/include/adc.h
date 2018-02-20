@@ -21,8 +21,9 @@
 #ifndef __ADC__H
 #define __ADC__H 1
 
-#include <avr/io.h> 
 #include "esp_types.h"
+#include <avr/io.h> 
+#include "util/delay.h"
 
 /*
  * Declarations of ADC's error codes

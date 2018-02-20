@@ -19,7 +19,15 @@
 #ifndef __ESP_TYPES__H
 #define __ESP_TYPES__H 1
 
+//Use optimized value for Solution, True value is 16000000UL
+#define F_CPU 1000000UL
+
 typedef unsigned char uint8_t;
+typedef struct _float_t 
+{
+	uint8_t l_part;
+	uint8_t r_part;
+} float_t;
 
 #if !defined (__linux__)
 /*
@@ -34,11 +42,6 @@ typedef int int16_t;
 typedef long int32_t;
 typedef long long int64_t;
 
-typedef struct _float_t 
-{
-	uint8_t l_part;
-	uint8_t r_part;
-} float_t;
 #endif
 
 #endif /* __ESP_TYPES__H */ 

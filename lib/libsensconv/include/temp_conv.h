@@ -6,23 +6,23 @@
 //
 //++
 // Name
-//    @file esp_types.h
+//    @file temp_conv.h
 //
 // Purpose
-//    @brief Specifies the data types used in the project  
+//    @brief Specifies the members of temperature parser module
 //
 // Revision Dates
 //    2018-01-27 (vigan.abd): Inital create
-//    $Log: esp_types.h $
+//    $Log: temp_conv.h $
 //--
 
 #ifndef __TEMP_CONV__H
 #define __TEMP_CONV__H 1
 
-#include "esp_math.h"
+#include "esp_types.h"
 
 /*
- * Declarations of binary to binary coded decimal converter
+ * Declarations of temperature parser members
  */
 void raw_2temp_val(uint16_t raw_val, float_t *const res);
 

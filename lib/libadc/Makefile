@@ -76,7 +76,7 @@ all:      debug
 
 test-pc: $(OBJ_DIR) $(LST_DIR) $(EXE_DIR) test-pc-do
 
-debug:    CFLAGS += -DDEBUG -O0 -g3 
+debug:    CFLAGS += -DDEBUG -Os -g3 
 debug:    $(OBJ_DIR) $(LST_DIR) $(EXE_DIR) $(EXE_DIR)/$(LIBNAME).a
 
 release:  CFLAGS += -DNDEBUG -O3 

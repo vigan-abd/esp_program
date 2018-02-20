@@ -46,7 +46,9 @@ SPLINTFLAGS +=  +standard -mustfreeonly -likelybool -temptrans -mayaliasunique \
 ####################################################################
 
 C_SRC +=  \
+../src/bcd.c  \
 ../src/r_buffer.c  \
+./src/test_bcd.c \
 ./src/test_r_buffer.c \
 ./src/main.c
 

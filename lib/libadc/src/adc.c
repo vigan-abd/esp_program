@@ -31,17 +31,9 @@
  ******************************************************************************/
 void adc_init (uint8_t presc_fact)
 {
-    // specify the Aref=AVcc;
-    ADMUX = (1 << REFS0);
-
-    // clear prescaler bits
     ADCSRA &= ~((1 << ADPS0) | (1 << ADPS1) | (1 << ADPS2)); 
-
-    /* set the predefined prescaler */
-    ADCSRA |= presc_fact;
-
-    /* enables conversion */
-    ADCSRA |= (1 << ADEN);
+    ADCSRA = (1 << ADEN) | (1 << ADSC) | (1 << ADFR) | presc_fact;
+    SFIOR=0x00;
 }
 
 /***************************************************************************//** 
@@ -58,38 +50,30 @@ void adc_init (uint8_t presc_fact)
  ******************************************************************************/
 uint8_t adc_get_raw (uint16_t *const raw_value, uint8_t channel)
 {
-    uint16_t val = 0;
+    uint16_t adc_value;
+    uint8_t temp;
 
     if (channel > 7) 
     {
         return (uint8_t) ADC_INVALID_CHANNEL;
     }
   
-    /* select the ADC Channel ch must be 0-7 */
-    ADMUX |= channel;
+    ADMUX= (1 << REFS0 ) | channel;
+    _delay_ms(1);
+    temp = ADCL;
+    adc_value = ADCH;
+    adc_value = (adc_value << 8) | temp;
 
-    /* start single conversion */
-    ADCSRA |= (1 << ADSC);
-
-    /* wait for conversion to complete */
-    while (! (ADCSRA & (1 << ADIF)))
-        ;
-
-    val = (ADCH << 8) | ADCL;
-
-    /* clear ADIF by writing one to it -> make it ready for the next adc conversion */
-    ADCSRA |= (1<<ADIF);
-
-    if (val == 0x000)
+    if (adc_value == 0x000)
     {
         return (uint8_t) ADC_SHORT_2GND;
     }
-    else if (val == 0x3FF)
+    else if (adc_value == 0x3FF)
     {
         return (uint8_t) ADC_SHORT_2BATTERY;
     }
 
-    *raw_value = val;
+    *raw_value = adc_value;
 
     return (uint8_t) ADC_NO_ERROR;
 }
